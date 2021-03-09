@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block body %}
+<div class="main-container">
+    {% if error %}
+    <div class="error">
+        <h2>
+            {{ error }}
+        </h2>
+    </div>
+    {% endif %}
+    <form action="/" method="post" name="math-form" class="math-form" onsubmit="return validate()">
+        <input type="text" name="math-input" class="math-input">
+        <input type='number' name="der-num" class="math-input derivtive-number" min="1" max="20">
+        <input type="submit" value="Calculate" class="submit">
+    </form>
+    <!-- {% set count = namespace(value=0) %}
+    {% set count.value = count.value + 1 %} -->
+    {% for derivative in derivatives %}
+        {% for step in derivative[0] %}
+            <div class="math-output">
+                <!-- $$\frac{d}{dx}=\frac{\ \ 1x^2 \ \ \cdot 3-2x^1+1x^1\cdot 2x}{\left [ 1x^2 \right ]^2}$$ -->
+                <div class="step-count">{{ loop.index }}-</div>
+                <div class="step">{{ step.get_latex() }}</div>
+            </div>
+            {% endfor %}
+        
+        <div class="divider">
+            <div></div>
+        </div>
+    {% endfor %}
+</div>
+<script>
+    let form = document.forms['math-form'];
+    function validate() {
+        if (form['math-input'].value.trim() != '') {
+            return true;
+        }
+        return false;
+    }
+</script>
+<div class="spacer"></div>
+{% endblock %}

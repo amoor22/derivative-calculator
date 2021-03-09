@@ -1,0 +1,65 @@
+html, body {
+    height: 100%;
+    font-size: 20px;
+    padding: 0;
+}
+body {
+    background-image: url('math-pattern.jpg');
+    /* background-repeat: repeat; */
+}
+.main-container {
+    position: fixed;
+    top: 5%;
+    bottom: 5%;
+    right: 5%;
+    left: 5%;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: auto;
+    /* width: 90vw;
+    height: 90vh; */
+    border-radius: 50px;
+    border-top: 3px solid rgba(255, 255, 255, 0.7);
+    border-left: 3px solid rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+}
+.math-form {
+    display: flex;
+    align-items: center;
+}
+.math-input {
+    width: 70%;
+    height: 50px;
+    font-family:'Times New Roman', Times, serif;
+    font-size: 2rem;
+}
+.math-output {
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+.math-output .step-count {
+    position: absolute;
+    left: 2%;
+}
+.divider {
+    width: 90%;
+    height: 2px;
+    display: flex;
+}
+.divider div {
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.7);
+
+}
+.spacer {
+    height: 1000px;
+    width: 100;
+}
