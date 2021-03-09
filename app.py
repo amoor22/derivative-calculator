@@ -6,7 +6,7 @@ from calculations import *
 # --------- FLASK ---------
 app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
-def index(): 
+def index():
     if request.method == 'POST':
         statement = str(request.form['math-input'])
         der_num = int(request.form['der-num'])
