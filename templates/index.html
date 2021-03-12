@@ -13,19 +13,43 @@
         </h2>
     </div>
     {% endif %}
+    {% if arabic %}
+    <form action="/language" method="post">
+        <select name="language" class="language" onchange="this.form.submit()">
+            <option value="ar">اللغة العربية</option>
+            <option value="en">English</option>
+        </select>
+    </form>
     <form action="/" method="post" name="math-form" class="math-form" onsubmit="return validate()">
-        <input type="text" name="math-input" class="math-input">
-        <input type='number' name="der-num" class="math-input derivtive-number" min="1" max="20">
+        <input type="submit" value="حساب" class="submit">
+        <input type='number' name="der-num" class="math-input derivtive-number" min="1" max="20" placeholder="ادخل رقم المشتقة" style="direction: rtl;">
+        <input type="text" name="math-input" class="math-input" placeholder="ادخل دالة تحتوي على x" style="direction: rtl;">
+    </form>
+    {% else %}
+    <form action="/language" method="post">
+        <select name="language" class="language" onchange="this.form.submit()">
+            <option value="en">English</option>
+            <option value="ar">اللغة العربية</option>
+        </select>
+    </form>
+    <form action="/" method="post" name="math-form" class="math-form" onsubmit="return validate()">
+        <input type="text" name="math-input" class="math-input" placeholder="Enter a function containing x" style="direction: ltr;">
+        <input type='number' name="der-num" class="math-input derivtive-number" min="1" max="20" placeholder="Enter the derivative number" style="direction: ltr;">
         <input type="submit" value="Calculate" class="submit">
     </form>
+        {% endif %}
     <!-- {% set count = namespace(value=0) %}
     {% set count.value = count.value + 1 %} -->
     {% for derivative in derivatives %}
         {% for step in derivative[0] %}
             <div class="math-output">
-                <!-- $$\frac{d}{dx}=\frac{\ \ 1x^2 \ \ \cdot 3-2x^1+1x^1\cdot 2x}{\left [ 1x^2 \right ]^2}$$ -->
-                <div class="step-count">{{ loop.index }}-</div>
-                <div class="step">{{ step.get_latex() }}</div>
+                {% if arabic %}
+                <div class="step" style="margin-left: 1rem;">{{ step.get_latex() }}</div>
+                <div class="step-text" style="margin-left: auto; direction: rtl;">{{ loop.index }}- {{ step.info_ar }}</div>
+                {% else %}
+                <div class="step-text" style="margin-right: auto;">{{ loop.index }}- {{ step.info_en }}</div>
+                <div class="step" style="margin-right: 1rem;">{{ step.get_latex() }}</div>
+                {% endif %}
             </div>
             {% endfor %}
         
@@ -33,15 +57,39 @@
             <div></div>
         </div>
     {% endfor %}
+    <div id="plot" style="margin-top: 0.5rem;"></div>
+    <footer>
+        <h3>عمل الطالب: عمر صفوت</h3>
+        <h3>الصف: الثاني عشر - ب</h3>
+        <h3>تحت إشراف الأستاذ الفاضل: محمود عبد الحميد </h3>
+        <h3>مدارس الإيمان - قسم البنين</h3>
+        <img src="https://www.alimans.com/content/theme/user/images/alimans-logo-main-s.svg" alt="logo">
+
+    </footer>
 </div>
-<script>
+<script type='text/javascript'>
     let form = document.forms['math-form'];
     function validate() {
-        if (form['math-input'].value.trim() != '') {
+        if (form['math-input'].value.trim() != '' && form['der-num'].value.trim() != '') {
             return true;
         }
         return false;
     }
+    {% if plotting %}
+    let x = {{ plotting[0]|safe }};
+    let y = {{ plotting[1]|safe }};
+    for(let i = 0; i < y.length; i++) {
+        if(y[i] == 'Infinity') {
+            y[i] = Infinity;
+        }
+    }
+    let trace = {
+        x: x,
+        y: y,
+        type: 'scatter'
+    }
+    Plotly.newPlot('plot', [trace])
+    {% endif %}
 </script>
 <div class="spacer"></div>
 {% endblock %}
