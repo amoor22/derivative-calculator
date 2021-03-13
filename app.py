@@ -14,6 +14,7 @@ class Error:
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
+        try:
             statement = str(request.form['math-input'])
             der_num = int(request.form['der-num'])
             print('ddd')
@@ -24,7 +25,7 @@ def index():
             cache['statement'] = statement
             cache['der_num'] = der_num
             return render_template('index.html', derivatives=derivatives, plotting=plotting, arabic=cache['arabic'], input=[statement, der_num])
-            print(e, 'fd')
+        except Exception as e:
             render_template('index.html', error=Error('An error occurred, please try again', 'حدث خطأ ما، حاول مرة أخرى'))
     return render_template('index.html', arabic=cache['arabic'])
 @app.route('/next/', methods=['POST', 'GET'])
