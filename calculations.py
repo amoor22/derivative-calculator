@@ -18,6 +18,7 @@ smp_steps_en = ['Calculate the derivative']
 smp_steps_ar = ['حساب المشتقة (مباشرة)']
 power_steps_en = ['Calculating the derivative of the bracket and its contents', 'Using the power rule', 'Substituting in the rule', 'Final simplification', 'Extra simplification']
 power_steps_ar = ['حساب مشتقة القوس وما بداخل القوس', 'باستخدام قانون مشتقة الدالة الأسية', 'التعويض في القانون', 'التبسيط النهائي', 'التبسيط الإضافي']
+rounding = 2
 class Step:
     def __init__(self, step, info_en, info_ar, count=0, latex=False):
         self.step = step
@@ -173,7 +174,7 @@ def get_derivative_mult(func1, func2):
         print(sum1, sum2)
     except Exception as e:
         sum1_text, sum2_text = sum1_org, sum2_org
-    steps.append(Step(r'$$\frac{d}{dx} = ' r'\left ('  f'{func1}' r'\right )' r' \cdot ' r'\left (' + f'{der2}' r'\right )' '+' r'\left (' f'{func2}' r'\right )' r' \cdot ' r'\left (' f'{der1}' r'\right )' '$$', mult_steps_en[2], mult_steps_ar[2], latex=True))
+    steps.append(Step(r'$$\frac{d}{dx} = ' r'\left ('  f"{py2tex(func1, print_formula=False, print_latex=False).replace('$', '')}" r'\right )' r' \cdot ' r'\left (' + f"{py2tex(der2, print_formula=False, print_latex=False).replace('$', '')}" r'\right )' '+' r'\left (' f"{py2tex(func2, print_formula=False, print_latex=False).replace('$', '')}" r'\right )' r' \cdot ' r'\left (' f"{py2tex(der1, print_formula=False, print_latex=False).replace('$', '')}" r'\right )' '$$', mult_steps_en[2], mult_steps_ar[2], latex=True))
     steps.append(Step(r'$$' r'\frac{d}{dx} = ' r'\left (' f'{sum1_text}' r'\right )' '+' r'\left (' f'{sum2_text}' r'\right )' r'$$', mult_steps_en[2], mult_steps_ar[2], latex=True))
     final_sum = smp.nsimplify(sum1 + sum2)
     steps.append(Step(str(final_sum), mult_steps_en[3], mult_steps_ar[3]))
@@ -185,9 +186,9 @@ def get_derivative_div(func1, func2):
     der2 = str(get_derivative_full(func2)[0][-1].step)
     func1 = get_sympy_format_full(func1)
     func2 = get_sympy_format_full(func2)
-    print(func1, der1, func2, der2)
+    print(func1, der1, func2, der2, 'fds')
     # s = r'$$f^{\prime}(x) = ' + f'{der1}' + '  |  ' + r'g^{\prime}(x) = ' + f'{der2}' + '$$'
-    steps.append(Step(r'$$f^{\prime}(x) = ' + f'{der1}' + '\; | \;' + r'g^{\prime}(x) = ' + f'{der2}' + '$$', div_steps_en[0], div_steps_ar[0], latex=True))
+    steps.append(Step(r'$$f^{\prime}(x) = ' + f'{der1}' + r'\; | \;' + r'g^{\prime}(x) = ' + f'{der2}' + '$$', div_steps_en[0], div_steps_ar[0], latex=True))
     steps.append(Step(r'$$\frac{d}{dx}=\frac{ g(x) \cdot f^{‎\prime}(x)-f(x)\cdot g^‎{\prime}(x)}{\left [ g(x) \right ]^2}$$', div_steps_en[1], div_steps_ar[1], latex=True))
     sum_num_first = smp.nsimplify(f'({get_sympy_format_full(func2)}) * ({der1})')
     sum_num_second = smp.nsimplify(f'({get_sympy_format_full(func1)}) * ({der2})')
@@ -203,25 +204,30 @@ def get_derivative_div(func1, func2):
     sum_num = smp.nsimplify(f'({sum_num_first}) - ({sum_num_second})')
     # final_sum = smp.nsimplify(f'({sum_num}) / (({get_sympy_format_full(func2)})**2)')
     steps.append(Step(f'({get_sympy_format_full(sum_num)})/({get_sympy_format_full(func2)})**2', div_steps_en[4], div_steps_ar[4]))
+    print(steps[-1], 'fds')
     return [steps, types[2]]
-def get_derivative_power(func, power):
+def get_derivative_power(before_func, func, power):
     steps = []
     func = get_sympy_format_full(func)
     power = float(power)
     power_new = power - 1
+    print(before_func, func, power)
     inside_der = str(get_derivative_full(func)[0][-1].step)
     # bracket_der = str(smp.nsimplify(f'{power} * ({func})'))
-    new_func = f'({func})**{power_new}'
-    steps.append(Step(r'$$n \cdot \left[ f(x) \right]^{n-1} = ' + f'{power}' r'\cdot' f"({py2tex(f'({func})**{power_new}').replace('$', '')})" + r'\;  |  \;' + r'f^{\prime}(x) = ' + f'{inside_der}' + '$$', power_steps_en[0], power_steps_ar[0], latex=True))
+    before_times_power = round(float(power) * float(before_func), rounding)
+    steps.append(Step(r'$$n \cdot \left[ f(x) \right]^{n-1} = ' + f'{py2tex(f"({before_func}) * ({power})", print_formula=False, print_latex=False).replace("$", "")}' r'\cdot' f"{py2tex(f'({func})**{power_new}').replace('$', '')}" + r'\;  |  \;' + r'f^{\prime}(x) = ' + f'{inside_der}' + '$$', power_steps_en[0], power_steps_ar[0], latex=True))
     steps.append(Step(r'$$' r'\frac{d}{dx} =' r'n \cdot \left[ f(x) \right]^{n-1}' r' \cdot ' r'f^{\prime}(x)' r'$$', power_steps_en[1], power_steps_ar[1], latex=True))
-    steps.append(Step(r'$$' r'\frac{d}{dx} = ' f"{py2tex(f'({power}) * ({new_func})', print_latex=False, print_formula=False).replace('$', '')}" r' \cdot ' f"({py2tex(inside_der).replace('$', '')})" r'$$', power_steps_en[2], power_steps_ar[2], latex=True))
-    inside_times_power = py2tex(str(smp.nsimplify(f'({power}) * ({inside_der})'))).replace('$', '')
+    new_func = f'({before_times_power})*({func})**{power_new}'
+    steps.append(Step(r'$$' r'\frac{d}{dx} = ' f"{py2tex(f'({new_func})', print_latex=False, print_formula=False).replace('$', '')}" r' \cdot ' f"({py2tex(inside_der).replace('$', '')})" r'$$', power_steps_en[2], power_steps_ar[2], latex=True))
+    inside_times_power = py2tex(str(smp.nsimplify(f'({before_times_power}) * ({inside_der})'))).replace('$', '')
     # steps.append(Step(r'$$' r'\frac{d}{dx} = ' f"({inside_times_power})" r' \cdot ' f"{py2tex(new_func, print_latex=False, print_formula=False).replace('$', '')}" r'$$', power_steps_en[3], power_steps_ar[3], latex=True))
-    steps.append(Step(f"({inside_times_power})" '*' f"{new_func}" , power_steps_en[3], power_steps_ar[3], latex=False))
+    new_func = f'({inside_times_power})*({func})**{power_new}'
+    steps.append(Step(f"{new_func}" , power_steps_en[3], power_steps_ar[3], latex=False))
     if power == 1:
         steps.append(Step(f"{inside_times_power}", power_steps_en[4], power_steps_ar[4], latex=False))
     # steps.append(Step(f"{final_sum}", power_steps_en[4], power_steps_ar[4], latex=False))
     # final_sum = (smp.simplify(f'({inside_times_power}) * ({new_func})'))
+    print(steps[-1])
     return [steps, types[3]]
 def remove_parentheses(string):
     string = string.replace('(', '')
@@ -253,7 +259,30 @@ def classify(statement, der_num):
         for i in range(der_num):
             statement = str(statement)
             statement_copy = str(statement_copy)
-            if len(re.findall(mult_pattern, statement)) == 1:
+            if len(re.findall(power_patterns[0], statement)) == 1 or len(re.findall(power_patterns[1], statement)) == 1:
+                for power in power_patterns:
+                    if len(re.findall(power, statement)) == 1:
+                        span = re.search(power, statement).span()
+                        try:
+                            before_func = float(statement.split('(')[0])
+                            spn = re.search(r'\(', statement).span()
+                        except Exception as e:
+                            try:
+                                search = re.search(mult_pattern, statement)
+                                if search:
+                                    before_func = float(remove_parentheses(statement[0: search.span()[0]]))
+                                    spn = search.span()
+                                else:
+                                    before_func = 1
+                                    spn = [1, -1]
+                            except Exception as e:
+                                spn = [1, -1]
+                        func, power = list(map(lambda x: x.strip(), [statement[1: span[0]], statement[span[0] + 1 + 2: ]]))
+                        func, power = remove_parentheses(func), remove_parentheses(power)
+                        func = func[spn[0] -1: ]
+                        cur_return.append(get_derivative_power(before_func, func, power))
+                        statement = cur_return[-1][0][-1].step
+            elif len(re.findall(mult_pattern, statement)) == 1:
                 span = re.search(mult_pattern, statement).span()
                 func1, func2 = list(map(lambda x: x.strip(), [statement[1: span[0]], statement[span[0] + 1 + 2: -1]]))
                 func1, func2 = remove_parentheses(func1), remove_parentheses(func2)
@@ -265,21 +294,12 @@ def classify(statement, der_num):
                 func1, func2 = remove_parentheses(func1), remove_parentheses(func2)
                 cur_return.append(get_derivative_div(func1, func2))
                 statement = cur_return[-1][0][-1].step
-            elif len(re.findall(power_patterns[0], statement)) == 1 or len(re.findall(power_patterns[1], statement)) == 1:
-                for power in power_patterns:
-                    if len(re.findall(power, statement)) == 1:
-                        span = re.search(power, statement).span()
-                        func, power = list(map(lambda x: x.strip(), [statement[1: span[0]], statement[span[0] + 1 + 2: ]]))
-                        func, power = remove_parentheses(func), remove_parentheses(power)
-                        print(func, power)
-                        cur_return.append(get_derivative_power(func, power))
-                        statement = cur_return[-1][0][-1].step
             else:
                 cur_return.append(get_derivative_full(statement))
                 statement = cur_return[-1][0][-1].step
     except Exception as e:
         from traceback import format_exc
-        # print(format_exc())
+        print(format_exc())
         calc = smp.diff(sympy_function(statement_copy), symbol, der_num)
         cur_return.append([[Step(calc, smp_steps_en[0], smp_steps_ar[0])], ''])
         statement = calc
