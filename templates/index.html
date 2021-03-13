@@ -57,9 +57,9 @@
     {% set main_loop = namespace(index=1) %}
     {% for derivative in derivatives %}
         {% if arabic %}
-        <div class="derivative-num" style="font-size: 1.7rem;">({{ main_loop.index }}) المشتقة</div>
+        <div class="derivative-num" style="font-size: 1.7rem; margin-top: 0.5rem;">({{ main_loop.index }}) المشتقة</div>
         {% else %}
-        <div class="derivative-num" style="font-size: 1.7rem;">Derivative number: ({{ main_loop.index }})</div>
+        <div class="derivative-num" style="font-size: 1.7rem; margin-top: 0.5rem;">Derivative number: ({{ main_loop.index }})</div>
         {% endif %}
         {% set main_loop.index = main_loop.index + 1 %}
         {% for step in derivative[0] %}
