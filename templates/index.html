@@ -77,6 +77,15 @@
             <div></div>
         </div>
     {% endfor %}
+    {% if input %}
+    <form action="/next/?data={{input[1] + 1}}" method="post" name='next'>
+        {% if arabic %}
+            <button type="submit">إيجاد المشتقة التالية</button>
+            {% else %}
+            <button type="submit">Calculate next derivative</button>
+        {% endif %}
+    </form>
+    {% endif %}
     <div id="plot" style="margin-top: 0.5rem;"></div>
     <footer>
         <h3>عمل الطالب: عمر صفوت</h3>

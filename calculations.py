@@ -222,7 +222,9 @@ def get_derivative_power(before_func, func, power):
     inside_times_power = py2tex(str(smp.nsimplify(f'({before_times_power}) * ({inside_der})'))).replace('$', '')
     # steps.append(Step(r'$$' r'\frac{d}{dx} = ' f"({inside_times_power})" r' \cdot ' f"{py2tex(new_func, print_latex=False, print_formula=False).replace('$', '')}" r'$$', power_steps_en[3], power_steps_ar[3], latex=True))
     new_func = f'({inside_times_power})*({func})**{power_new}'
+    # get sympy
     steps.append(Step(f"{new_func}" , power_steps_en[3], power_steps_ar[3], latex=False))
+    # print(get_sympy_format_full(inside_times_power), 'dl')
     if power == 1:
         steps.append(Step(f"{inside_times_power}", power_steps_en[4], power_steps_ar[4], latex=False))
     # steps.append(Step(f"{final_sum}", power_steps_en[4], power_steps_ar[4], latex=False))
@@ -323,3 +325,4 @@ def classify(statement, der_num):
     # print(statement)
     # Difficult to test all then compare with smp, since some functions need 2 inputs
 # py2tex(get_sympy_format_full('(180.0*x**2.0-24.0*x**1+3)/(12.0*x**2.0)**2'))
+# classify('(x**2+4)^2', 3)
