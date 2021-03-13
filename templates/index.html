@@ -9,7 +9,10 @@
     {% if error %}
     <div class="error">
         <h2>
-            {{ error }}
+            {{ error.string_ar }}
+        </h2>
+        <h2>
+            {{ error.string_en }}
         </h2>
     </div>
     {% endif %}
@@ -23,7 +26,7 @@
     <form action="/" method="post" name="math-form" class="math-form" onsubmit="return validate()">
         <input type="submit" value="حساب" class="submit">
         <input type='number' name="der-num" class="math-input derivtive-number" min="1" max="20" placeholder="ادخل رقم المشتقة" style="direction: rtl;">
-        <input type="text" name="math-input" class="math-input" placeholder="ادخل دالة تحتوي على x" style="direction: rtl;">
+        <input type="text" name="math-input" class="math-input" placeholder="ادخل دالة تحتوي على x" style="direction: rtl;" oninput="if (this.value.trim() != '') {this.style.direction = 'ltr';} else {this.style.direction = 'rtl'}">
     </form>
     {% else %}
     <form action="/language" method="post">
@@ -38,9 +41,27 @@
         <input type="submit" value="Calculate" class="submit">
     </form>
         {% endif %}
+    <div class="shortcuts">
+        {% if arabic %}
+        <button class="shortcut" onclick="document.forms['math-form']['math-input'].value = '()^'; document.forms['math-form']['math-input'].style.direction = 'ltr'">الدالة الأسية</button>
+        <button class="shortcut" onclick="document.forms['math-form']['math-input'].value = '()/()'; document.forms['math-form']['math-input'].style.direction = 'ltr'">قسمة دالتين</button>
+        <button class="shortcut" onclick="document.forms['math-form']['math-input'].value = '()*()'; document.forms['math-form']['math-input'].style.direction = 'ltr'">ضرب دالتين</button>
+        {% else %}
+        <button class="shortcut" onclick="document.forms['math-form']['math-input'].value = '()*()'; document.forms['math-form']['math-input'].style.direction = 'ltr'">Product rule</button>
+        <button class="shortcut" onclick="document.forms['math-form']['math-input'].value = '()/()'; document.forms['math-form']['math-input'].style.direction = 'ltr'">Difference rule</button>
+        <button class="shortcut" onclick="document.forms['math-form']['math-input'].value = '()^'; document.forms['math-form']['math-input'].style.direction = 'ltr'">Power rule</button>
+        {% endif %}
+    </div>
     <!-- {% set count = namespace(value=0) %}
     {% set count.value = count.value + 1 %} -->
+    {% set main_loop = namespace(index=1) %}
     {% for derivative in derivatives %}
+        {% if arabic %}
+        <div class="derivative-num" style="font-size: 1.7rem;">({{ main_loop.index }}) المشتقة</div>
+        {% else %}
+        <div class="derivative-num" style="font-size: 1.7rem;">Derivative number: ({{ main_loop.index }})</div>
+        {% endif %}
+        {% set main_loop.index = main_loop.index + 1 %}
         {% for step in derivative[0] %}
             <div class="math-output">
                 {% if arabic %}
@@ -52,7 +73,6 @@
                 {% endif %}
             </div>
             {% endfor %}
-        
         <div class="divider">
             <div></div>
         </div>
@@ -91,5 +111,5 @@
     Plotly.newPlot('plot', [trace])
     {% endif %}
 </script>
-<div class="spacer"></div>
+<!-- <div class="spacer"></div> -->
 {% endblock %}

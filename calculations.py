@@ -3,19 +3,21 @@ import sympy as smp
 from pytexit import py2tex
 from flask import Flask, render_template, redirect, request, url_for
 possible_pow = ('**', '^')
-min_plot, max_plot = -20, 20
+min_plot, max_plot = -40, 40
 # statement = "2.5x^2 + 4x + 5 + 5x"
-types = ('statement', 'multiply', 'division')
+types = ('statement', 'multiply', 'division', 'power')
 symbol = 'x'
 # steps
 normal_steps_en = ['Simplify (if needed)', 'Using derivative rules', 'Final simplification (if needed)']
 normal_steps_ar = ['التبسيط (إن وجد)', 'باستخدام قانون المشتقة', 'التبسيط النهائي (إن وجد)']
-mult_steps_en = ['Calculate the derivative of both functions', 'Using the rule of multiplication', 'Substituting in the rule', 'Adding values together']
+mult_steps_en = ['Calculate the derivative of both functions', 'Using the multiplication rule', 'Substituting in the rule', 'Adding values together']
 mult_steps_ar = ['حساب المشتقة لكل دالة', 'باستخدام قانون مشتقة ضرب دالتين', 'التعويض في القانون', 'جمع الطرفين']
-div_steps_en = ['Calculate the derivative of both functions', 'Using the rule of division', 'Substituting in the rule', 'Adding values together', 'Final simplification']
+div_steps_en = ['Calculate the derivative of both functions', 'Using the division rule', 'Substituting in the rule', 'Adding values together', 'Final simplification']
 div_steps_ar = ['حساب المشتقة لكل دالة', 'باستخدام قانون مشتقة قسمة دالتين', 'التعويض في القانون', 'طرح الطرف الثاني من الطرف الأول', 'التبسيط النهائي']
 smp_steps_en = ['Calculate the derivative']
 smp_steps_ar = ['حساب المشتقة (مباشرة)']
+power_steps_en = ['Calculating the derivative of the bracket and its contents', 'Using the power rule', 'Substituting in the rule', 'Final simplification', 'Extra simplification']
+power_steps_ar = ['حساب مشتقة القوس وما بداخل القوس', 'باستخدام قانون مشتقة الدالة الأسية', 'التعويض في القانون', 'التبسيط النهائي', 'التبسيط الإضافي']
 class Step:
     def __init__(self, step, info_en, info_ar, count=0, latex=False):
         self.step = step
@@ -115,6 +117,8 @@ class Variable(Unit):
 
 def get_derivative_full(statement):
     statement = re.sub(r'\s+', '', statement)
+    statement = re.sub(r'\(', '', statement)
+    statement = re.sub(r'\)', '', statement)
     original_tex = ''
     steps = []
     stop = ['+', '-']
@@ -133,7 +137,10 @@ def get_derivative_full(statement):
     steps.append(Step(smp.nsimplify(new_statement), normal_steps_en[2], normal_steps_ar[2], 3))
     return [steps, types[0]]
 def get_sympy_format_full(statement):
+    statement = str(statement) 
     statement = re.sub(r'\s+', '', statement)
+    statement = re.sub(r'\(', '', statement)
+    statement = re.sub(r'\)', '', statement)
     original_tex = ''
     steps = []
     stop = ['+', '-']
@@ -153,6 +160,8 @@ def get_derivative_mult(func1, func2):
     steps = []
     der1 = str(get_derivative_full(func1)[0][-1].step)
     der2 = str(get_derivative_full(func2)[0][-1].step)
+    func1 = get_sympy_format_full(func1)
+    func2 = get_sympy_format_full(func2)
     steps.append(Step(r'$$f^{\prime}(x) = ' + f'{der1}' + r'\;  |  \;' + r'g^{\prime}(x) = ' + f'{der2}' + '$$', mult_steps_en[0], mult_steps_ar[0], latex=True))
     steps.append(Step(r'$$\frac{d}{dx} = f\left ( {x} \right ) \cdot g^{\prime}\left ( {x} \right ) + g\left ( {x} \right ) \cdot f^{\prime}\left ( {x} \right )$$', mult_steps_en[1], mult_steps_ar[1], latex=True))
     sum1 = smp.nsimplify(f'({der2}) * ({get_sympy_format_full(func1)})')
@@ -174,6 +183,9 @@ def get_derivative_div(func1, func2):
     steps = []
     der1 = str(get_derivative_full(func1)[0][-1].step)
     der2 = str(get_derivative_full(func2)[0][-1].step)
+    func1 = get_sympy_format_full(func1)
+    func2 = get_sympy_format_full(func2)
+    print(func1, der1, func2, der2)
     # s = r'$$f^{\prime}(x) = ' + f'{der1}' + '  |  ' + r'g^{\prime}(x) = ' + f'{der2}' + '$$'
     steps.append(Step(r'$$f^{\prime}(x) = ' + f'{der1}' + '\; | \;' + r'g^{\prime}(x) = ' + f'{der2}' + '$$', div_steps_en[0], div_steps_ar[0], latex=True))
     steps.append(Step(r'$$\frac{d}{dx}=\frac{ g(x) \cdot f^{‎\prime}(x)-f(x)\cdot g^‎{\prime}(x)}{\left [ g(x) \right ]^2}$$', div_steps_en[1], div_steps_ar[1], latex=True))
@@ -185,13 +197,32 @@ def get_derivative_div(func1, func2):
     substitute = substitute.replace('der1', py2tex(der1).replace('$', ''))
     substitute = substitute.replace('der2', py2tex(der2).replace('$', ''))
     steps.append(Step(substitute, div_steps_en[2], div_steps_ar[2], latex=True))
-    b = r'$$\frac{d}{dx}=\frac{' r'\left (' f'{sum_num_first}' r'\right )' r'- \left (' f'{sum_num_second}' r'\right )' '}{\left [' f'{func2}' r'\right ]^2}$$'
-    steps.append(Step(b, div_steps_en[3], div_steps_ar[3], latex=True))
+    # b = r'$$\frac{d}{dx}=\frac{' r'\left (' f'{sum_num_first}' r'\right )' r'- \left (' f'{sum_num_second}' r'\right )' '}{\left [' f'{func2}' r'\right ]^2}$$'
+    b = f'(({sum_num_first}) - ({sum_num_second})) / ({func2})**2'
+    steps.append(Step(b, div_steps_en[3], div_steps_ar[3], latex=False))
     sum_num = smp.nsimplify(f'({sum_num_first}) - ({sum_num_second})')
-    final_sum = smp.nsimplify(f'({sum_num}) / (({get_sympy_format_full(func2)})**2)')
-    steps.append(Step(f'({sum_num})/({func2})**2', div_steps_en[4], div_steps_ar[4]))
-    # steps.append(Step(py2tex(final_sum, print_formula=False, print_latex=False), div_steps_en[3], div_steps_ar[3], latex=True))
+    # final_sum = smp.nsimplify(f'({sum_num}) / (({get_sympy_format_full(func2)})**2)')
+    steps.append(Step(f'({get_sympy_format_full(sum_num)})/({get_sympy_format_full(func2)})**2', div_steps_en[4], div_steps_ar[4]))
     return [steps, types[2]]
+def get_derivative_power(func, power):
+    steps = []
+    func = get_sympy_format_full(func)
+    power = float(power)
+    power_new = power - 1
+    inside_der = str(get_derivative_full(func)[0][-1].step)
+    # bracket_der = str(smp.nsimplify(f'{power} * ({func})'))
+    new_func = f'({func})**{power_new}'
+    steps.append(Step(r'$$n \cdot \left[ f(x) \right]^{n-1} = ' + f'{power}' r'\cdot' f"({py2tex(f'({func})**{power_new}').replace('$', '')})" + r'\;  |  \;' + r'f^{\prime}(x) = ' + f'{inside_der}' + '$$', power_steps_en[0], power_steps_ar[0], latex=True))
+    steps.append(Step(r'$$' r'\frac{d}{dx} =' r'n \cdot \left[ f(x) \right]^{n-1}' r' \cdot ' r'f^{\prime}(x)' r'$$', power_steps_en[1], power_steps_ar[1], latex=True))
+    steps.append(Step(r'$$' r'\frac{d}{dx} = ' f"{py2tex(f'({power}) * ({new_func})', print_latex=False, print_formula=False).replace('$', '')}" r' \cdot ' f"({py2tex(inside_der).replace('$', '')})" r'$$', power_steps_en[2], power_steps_ar[2], latex=True))
+    inside_times_power = py2tex(str(smp.nsimplify(f'({power}) * ({inside_der})'))).replace('$', '')
+    # steps.append(Step(r'$$' r'\frac{d}{dx} = ' f"({inside_times_power})" r' \cdot ' f"{py2tex(new_func, print_latex=False, print_formula=False).replace('$', '')}" r'$$', power_steps_en[3], power_steps_ar[3], latex=True))
+    steps.append(Step(f"({inside_times_power})" '*' f"{new_func}" , power_steps_en[3], power_steps_ar[3], latex=False))
+    if power == 1:
+        steps.append(Step(f"{inside_times_power}", power_steps_en[4], power_steps_ar[4], latex=False))
+    # steps.append(Step(f"{final_sum}", power_steps_en[4], power_steps_ar[4], latex=False))
+    # final_sum = (smp.simplify(f'({inside_times_power}) * ({new_func})'))
+    return [steps, types[3]]
 def remove_parentheses(string):
     string = string.replace('(', '')
     string = string.replace(')', '')
@@ -217,12 +248,12 @@ def classify(statement, der_num):
     cur_return = []
     div_pattern = r'\)\/\('
     mult_pattern = r'\)\*\('
+    power_patterns = [r'\)\^', r'\)\*\*']
     try:
         for i in range(der_num):
             statement = str(statement)
             statement_copy = str(statement_copy)
             if len(re.findall(mult_pattern, statement)) == 1:
-                print('dsa')
                 span = re.search(mult_pattern, statement).span()
                 func1, func2 = list(map(lambda x: x.strip(), [statement[1: span[0]], statement[span[0] + 1 + 2: -1]]))
                 func1, func2 = remove_parentheses(func1), remove_parentheses(func2)
@@ -234,10 +265,21 @@ def classify(statement, der_num):
                 func1, func2 = remove_parentheses(func1), remove_parentheses(func2)
                 cur_return.append(get_derivative_div(func1, func2))
                 statement = cur_return[-1][0][-1].step
+            elif len(re.findall(power_patterns[0], statement)) == 1 or len(re.findall(power_patterns[1], statement)) == 1:
+                for power in power_patterns:
+                    if len(re.findall(power, statement)) == 1:
+                        span = re.search(power, statement).span()
+                        func, power = list(map(lambda x: x.strip(), [statement[1: span[0]], statement[span[0] + 1 + 2: ]]))
+                        func, power = remove_parentheses(func), remove_parentheses(power)
+                        print(func, power)
+                        cur_return.append(get_derivative_power(func, power))
+                        statement = cur_return[-1][0][-1].step
             else:
                 cur_return.append(get_derivative_full(statement))
                 statement = cur_return[-1][0][-1].step
     except Exception as e:
+        from traceback import format_exc
+        # print(format_exc())
         calc = smp.diff(sympy_function(statement_copy), symbol, der_num)
         cur_return.append([[Step(calc, smp_steps_en[0], smp_steps_ar[0])], ''])
         statement = calc
@@ -260,7 +302,4 @@ def classify(statement, der_num):
     return cur_return, [x, y]
     # print(statement)
     # Difficult to test all then compare with smp, since some functions need 2 inputs
-# get_derivative_div("2x + x", 'x^2')
-s = smp.diff('(x+2)/(x+3)', 'x', 1)
-# print(classify('(2x + x) * (x)', 2)[0][-1].step)
-# print(smp.diff('y', 'x'))
+# py2tex(get_sympy_format_full('(180.0*x**2.0-24.0*x**1+3)/(12.0*x**2.0)**2'))

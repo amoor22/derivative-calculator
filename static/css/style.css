@@ -5,6 +5,7 @@ html, body {
 }
 body {
     background-image: url('math-pattern.jpg');
+    box-sizing: border-box;
     /* background-repeat: repeat; */
 }
 .main-container {
