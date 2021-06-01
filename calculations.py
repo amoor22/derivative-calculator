@@ -198,7 +198,6 @@ def get_derivative_div(func1, func2):
     substitute = substitute.replace('der1', py2tex(der1).replace('$', ''))
     substitute = substitute.replace('der2', py2tex(der2).replace('$', ''))
     steps.append(Step(substitute, div_steps_en[2], div_steps_ar[2], latex=True))
-    # b = r'$$\frac{d}{dx}=\frac{' r'\left (' f'{sum_num_first}' r'\right )' r'- \left (' f'{sum_num_second}' r'\right )' '}{\left [' f'{func2}' r'\right ]^2}$$'
     b = f'(({sum_num_first}) - ({sum_num_second})) / ({func2})**2'
     steps.append(Step(b, div_steps_en[3], div_steps_ar[3], latex=False))
     sum_num = smp.nsimplify(f'({sum_num_first}) - ({sum_num_second})')
@@ -213,22 +212,17 @@ def get_derivative_power(before_func, func, power):
     power_new = power - 1
     print(before_func, func, power)
     inside_der = str(get_derivative_full(func)[0][-1].step)
-    # bracket_der = str(smp.nsimplify(f'{power} * ({func})'))
     before_times_power = round(float(power) * float(before_func), rounding)
     steps.append(Step(r'$$n \cdot \left[ f(x) \right]^{n-1} = ' + f'{py2tex(f"({before_func}) * ({power})", print_formula=False, print_latex=False).replace("$", "")}' r'\cdot' f"{py2tex(f'({func})**{power_new}').replace('$', '')}" + r'\;  |  \;' + r'f^{\prime}(x) = ' + f'{inside_der}' + '$$', power_steps_en[0], power_steps_ar[0], latex=True))
     steps.append(Step(r'$$' r'\frac{d}{dx} =' r'n \cdot \left[ f(x) \right]^{n-1}' r' \cdot ' r'f^{\prime}(x)' r'$$', power_steps_en[1], power_steps_ar[1], latex=True))
     new_func = f'({before_times_power})*({func})**{power_new}'
     steps.append(Step(r'$$' r'\frac{d}{dx} = ' f"{py2tex(f'({new_func})', print_latex=False, print_formula=False).replace('$', '')}" r' \cdot ' f"({py2tex(inside_der).replace('$', '')})" r'$$', power_steps_en[2], power_steps_ar[2], latex=True))
     inside_times_power = py2tex(str(smp.nsimplify(f'({before_times_power}) * ({inside_der})'))).replace('$', '')
-    # steps.append(Step(r'$$' r'\frac{d}{dx} = ' f"({inside_times_power})" r' \cdot ' f"{py2tex(new_func, print_latex=False, print_formula=False).replace('$', '')}" r'$$', power_steps_en[3], power_steps_ar[3], latex=True))
     new_func = f'({inside_times_power})*({func})**{power_new}'
     # get sympy
     steps.append(Step(f"{new_func}" , power_steps_en[3], power_steps_ar[3], latex=False))
-    # print(get_sympy_format_full(inside_times_power), 'dl')
     if power == 1:
         steps.append(Step(f"{inside_times_power}", power_steps_en[4], power_steps_ar[4], latex=False))
-    # steps.append(Step(f"{final_sum}", power_steps_en[4], power_steps_ar[4], latex=False))
-    # final_sum = (smp.simplify(f'({inside_times_power}) * ({new_func})'))
     print(steps[-1])
     return [steps, types[3]]
 def remove_parentheses(string):
@@ -322,7 +316,6 @@ def classify(statement, der_num):
     except Exception as e:
         x, y = None, None 
     return cur_return, [x, y]
-    # print(statement)
     # Difficult to test all then compare with smp, since some functions need 2 inputs
 # py2tex(get_sympy_format_full('(180.0*x**2.0-24.0*x**1+3)/(12.0*x**2.0)**2'))
 # classify('(x**2+4)^2', 3)
