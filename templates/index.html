@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<link rel="icon" type="image/x-icon" href="static\css\icon.png">
 
 {% endblock %}
 
@@ -19,10 +18,11 @@
     {% endif %}
     {% if arabic %}
     <form action="/language" method="post">
-        <select name="language" class="language" onchange="this.form.submit()">
+        <!-- <select name="language" class="language" onchange="this.form.submit()">
             <option value="ar">اللغة العربية</option>
             <option value="en">English</option>
-        </select>
+        </select> -->
+        <button text="English" class="language" name="language" value="en" onclick="this.form.submit()">English</button>
     </form>
     <form action="/" method="post" name="math-form" class="math-form" onsubmit="return validate()">
         <input type="submit" value="حساب" class="submit">
@@ -31,10 +31,11 @@
     </form>
     {% else %}
     <form action="/language" method="post">
-        <select name="language" class="language" onchange="this.form.submit()">
+        <!-- <select name="language" class="language" onchange="this.form.submit()">
             <option value="en">English</option>
             <option value="ar">اللغة العربية</option>
-        </select>
+        </select> -->
+        <button text="اللغة العربية" class="language" name="language" value="ar" onclick="this.form.submit()">اللغة العربية</button>
     </form>
     <form action="/" method="post" name="math-form" class="math-form" onsubmit="return validate()">
         <input type="text" name="math-input" class="math-input" placeholder="Enter a function containing x" style="direction: ltr;">
