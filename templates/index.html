@@ -90,11 +90,18 @@
     {% endif %}
     <div id="plot" style="margin-top: 0.5rem;"></div>
     <footer>
+        {% if arabic %}
         <h3>عمل الطالب: عمر صفوت</h3>
         <h3>الصف: الثاني عشر - ب</h3>
         <h3>تحت إشراف الأستاذ الفاضل: محمود عبد الحميد </h3>
         <h3>مدارس الإيمان - قسم البنين</h3>
-        <img src="https://www.alimans.com/content/theme/user/images/alimans-logo-main-s.svg" alt="logo">
+        {% else %}
+        <h3>Made by: Omar Safwat</h3>
+        <h3>Grade 12-B</h3>
+        <h3>Under supervision of Mr. Mahmoud Abdul-hameed</h3>
+        <h3>Al-Iman School - Boy's section</h3>    
+        {% endif %}
+        <img src="static\school_logo.svg" alt="logo">
 
     </footer>
 </div>
