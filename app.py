@@ -1,8 +1,5 @@
 import re
 from flask.globals import session
-from flask.json import dumps, jsonify
-import sympy as smp
-from pytexit import py2tex
 from flask import Flask, render_template, redirect, request, url_for, session
 from calculations import *
 import jsonpickle
